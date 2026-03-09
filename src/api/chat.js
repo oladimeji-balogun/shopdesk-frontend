@@ -4,7 +4,7 @@ const chatBaseUrl = "http://localhost:8000/chat"
 const sessionBaseUrl = "http://localhost:8000/sessions"
 
 // function to get all messages
-async function getMessages ( session_id ) {
+export async function getMessages ( session_id ) {
     const url = sessionBaseUrl + `/${session_id}/messages`;
     try {
         const messages = await axios.get(url, {
@@ -21,13 +21,10 @@ async function getMessages ( session_id ) {
 }
 
 // function to get all the user sessions 
-async function  getUserSessions (user_id) {
-    const url = sessionBaseUrl + `/${user_id}/sessions`; 
-
+export async function  getUserSessions () {
     try {
-
     
-        const sessions = await axios.get(url, 
+        const sessions = await axios.get(sessionBaseUrl, 
             {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("access-token")}`
@@ -42,7 +39,7 @@ async function  getUserSessions (user_id) {
 }
 
 // function to send a message 
-async function sendMessage (session_id, message) {
+export async function sendMessage (session_id, message) {
     const url = chatBaseUrl + `/${session_id}`; 
     try {
         const response = await axios.post(url, {content: message}, {
@@ -56,13 +53,14 @@ async function sendMessage (session_id, message) {
     }
 }
 
-async function createSession () {
+export async function createSession () {
     try {
-        const session = await axios.post(sessionBaseUrl, {
+        const session = await axios.post(sessionBaseUrl, {}, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("access-token")}`
             }
         })
+        return session
     } catch (error) {
         console.log(error)
     }
