@@ -31,7 +31,7 @@ export default function Chat () {
         }
         async function fetchSessionMessages(session) {
             const messages = await getMessages(session)
-            setMessages(messages.data.messages)
+            setMessages(messages.data)
         }
         fetchSessionMessages(activeSession)
     }, [activeSession])
@@ -41,7 +41,7 @@ export default function Chat () {
         const response = await createSession()
         const newSession = response.data
         setSessions([...sessions, newSession])
-        setActiveSession(newSession)
+        setActiveSession(newSession.session_id)
     }
 
     function handleSelectSession (sessionId) {
@@ -115,7 +115,7 @@ export default function Chat () {
             </div>
 
             <div id='submit-btn-area' className='border-t border-slate-200 p-4 bg-white flex gap-3 items-end'>
-                <textarea className='flex-1 resize-none rounded-xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500' name="input-text" id="query" value={input} cols={40} rows={5} placeholder='type your query here' onChange={e => setInput(e.target.value)}/>
+                <textarea className='flex-1 resize-none rounded-xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500' name="input-text" id="query" value={input} cols={40} rows={3} placeholder='type your query here' onChange={e => setInput(e.target.value)}/>
 
                 <button className='px-5 py-3 rounded-xl text-sm font-medium bg-[#2563EB] text-white hover:bg-[#1D4ED8] transition-colors disabled:opacity-50' disabled={loading} onClick={handleSendMessage}>
                     {loading? "sending" : "send"}
