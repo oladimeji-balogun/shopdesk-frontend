@@ -1,70 +1,93 @@
-
-
 import React, { useState } from 'react'
-import { loginUser } from '../../api/auth';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom'
+import { loginUser } from '../../api/auth'
 
-function Login() {
-    const navigate = useNavigate();
+export default function Login() {
+    const [email, setEmail] = useState("")
+    const [password, setPassword] = useState("")
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState("")
 
-    const [ email, setEmail ] = useState(""); 
-    const [ password, setPassword ] = useState(""); 
-    const [ loading, setLoading ] = useState(false);
-    const [ error, setError ] = useState("");
+    const navigate = useNavigate()
 
-    // function to handle submision
-    async function handleSubmit ( event ) {
-        event.preventDefault();
-        setLoading(true);
-        // the login logic
+    async function handleSubmit(e) {
+        e.preventDefault()
+        setLoading(true)
+        setError("")
         try {
-            let response = await loginUser(email, password);
-            console.log(response);
-            localStorage.setItem("access-token", response.data.access_token);
-
-            const role = response.data.role; 
-            if (role === "customer") {
-                navigate("/chat")
-            } else if (role === "agent"){
-                navigate("/agent/dashboard")
-            }
-        } catch (error) {
-            setError("invalid email or password");
+            const response = await loginUser(email, password)
+            const { access_token, refresh_token, user_id, role } = response.data
+            localStorage.setItem("access-token", access_token)
+            localStorage.setItem("refresh-token", refresh_token)
+            localStorage.setItem("user_id", user_id)
+            localStorage.setItem("role", role)
+            navigate(role === "agent" ? "/dashboard" : "/chat")
+        } catch {
+            setError("Invalid email or password.")
         } finally {
-            setLoading(false);
+            setLoading(false)
         }
     }
 
-  return (
-    <div className='flex  w-full bg-[#F8FAFC] min-h-screen items-center justify-center'>
-        <div className='rounded-xl shadow-sm border w-full max-w-md p-8'>
-            <h1 className='text-2xl font-semibold tracking-tight text-[#0F172A]'>ShopDesk</h1>
-            <p className='text-sm text-[#64748B] mt-1'>sign in to your account</p>
-
-        <form onSubmit={handleSubmit} className='mt-6 flex flex-col gap-4 w-full'>
-
-            <div>
-                <label htmlFor="email" className='text-left text-xs font-medium uppercase tracking-wide text-[#64748B]'>Email</label>
-
-                <input type="email" id='email' className='w-full px-4 py-2.5 rounded-lg border border-slate-200
-                text-sm text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-blue-500' value={email} onChange={e => setEmail(e.target.value)} />
+    return (
+        <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4">
+            {/* Logo */}
+            <div className="mb-8">
+                <span className="text-sm font-semibold text-slate-900">ShopDesk</span>
             </div>
-            <div>
-                <label htmlFor="password" className='text-left text-xs font-medium uppercase tracking-wide text-[#64748B]'>Password</label>
-                <input type="password" id='password' className='w-full px-4 py-2.5 rounded-lg border border-slate-200
-                text-sm text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-blue-500' value={password} onChange={e => setPassword(e.target.value)}/>
-            </div>
-            <button type='submit' disabled={loading} className='bg-[#2563EB] text-white hover:bg-[#1D4ED8] transition-colors duration-150 w-full py-2.5 rounded-lg font-medium text-sm'>{loading ? "Logging in" : "Log in"}</button>
-        </form>
-        {error && <p className='text-sm text-[#EF4444]'>{error}</p>}
 
-        <p className='text-sm text-[#64748B] mt-4 text-center'>Don't have an account?{" "}
-            <Link to="/register" className='text-[#2563EB] font-medium hover:underline'>Sign in</Link>
-        </p>
+            {/* Card */}
+            <div className="w-full max-w-md border border-slate-200 rounded-lg shadow-sm p-8">
+                <div className="mb-6">
+                    <h1 className="text-2xl font-bold text-slate-900">Welcome back</h1>
+                    <p className="text-sm text-slate-500 mt-1">Sign in to your account</p>
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="space-y-1">
+                        <label className="text-xs font-medium text-slate-700">Email</label>
+                        <input
+                            type="email"
+                            placeholder="you@example.com"
+                            value={email}
+                            onChange={e => setEmail(e.target.value)}
+                            required
+                            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-colors"
+                        />
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-medium text-slate-700">Password</label>
+                        <input
+                            type="password"
+                            placeholder="••••••••"
+                            value={password}
+                            onChange={e => setPassword(e.target.value)}
+                            required
+                            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-colors"
+                        />
+                    </div>
+
+                    {error && (
+                        <p className="text-xs text-red-500">{error}</p>
+                    )}
+
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+                    >
+                        {loading ? "Signing in..." : "Continue"}
+                    </button>
+                </form>
+
+                <p className="text-sm text-slate-500 text-center mt-6">
+                    Don't have an account?{" "}
+                    <Link to="/register" className="text-blue-600 font-medium hover:text-blue-700 transition-colors">
+                        Register
+                    </Link>
+                </p>
+            </div>
         </div>
-        
-    </div>
-  )
+    )
 }
-
-export default Login
