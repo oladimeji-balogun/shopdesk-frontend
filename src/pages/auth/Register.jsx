@@ -1,82 +1,119 @@
-
-
 import React, { useState } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
 import { registerUser } from '../../api/auth'
-import { useNavigate, Link } from 'react-router-dom';
 
 export default function Register() {
-    const navigate = useNavigate();
-    
-    // declare the states 
-    const [ name, setName ] = useState("");
-    const [ email, setEmail ] = useState("");
-    const [ password, setPassword ] = useState("");
-    const [ phone, setPhone ] = useState(""); 
-    const [ loading, setLoading ] = useState(false); 
-    const [ error, setError ] = useState("");
+    const [name, setName] = useState("")
+    const [email, setEmail] = useState("")
+    const [phone, setPhone] = useState("")
+    const [password, setPassword] = useState("")
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState("")
 
-    async function handleSubmit( event ) {
-        event.preventDefault(); 
-        setLoading(true);
+    const navigate = useNavigate()
+
+    async function handleSubmit(e) {
+        e.preventDefault()
+        setLoading(true)
+        setError("")
         try {
-            const response = await registerUser(name, email, phone, password);
-
-            console.log(response);
-            localStorage.setItem("access-token", response.data.access_token)
-            navigate("/chat");
-        } catch (error) {
-            // console.log("could not register user");
-            setError("user registration failed!");
+            const response = await registerUser(name, email, phone, password)
+            const { access_token, refresh_token, user_id, role } = response.data
+            localStorage.setItem("access-token", access_token)
+            localStorage.setItem("refresh-token", refresh_token)
+            localStorage.setItem("user_id", user_id)
+            localStorage.setItem("role", role)
+            navigate(role === "agent" ? "/dashboard" : "/chat")
+        } catch {
+            setError("Registration failed. Please check your details and try again.")
         } finally {
-            setLoading(false);
+            setLoading(false)
         }
     }
 
     return (
-    <div className='flex  w-full bg-[#F8FAFC] min-h-screen items-center justify-center'>
-        <div className='rounded-xl shadow-sm border w-full max-w-md p-8'>
-            <h1 className='text-2xl font-semibold tracking-tight text-[#0F172A]'>ShopDesk</h1>
+        <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4">
+            {/* Logo */}
+            <div className="mb-8">
+                <span className="text-sm font-semibold text-slate-900">ShopDesk</span>
+            </div>
 
-            <p className='text-sm text-[#64748B] mt-1'>create a new account</p>
-            <form className='mt-6 flex flex-col gap-4 w-full' onSubmit={handleSubmit}>
-                <div className='flex flex-col gap-1'>
-                    <label htmlFor="name" className='text-left text-xs font-medium uppercase tracking-wide text-[#64748B]'>Name</label>
-                    <input type="text" name="name" value={name} id="name"   className='w-full px-4 py-2.5 rounded-lg border   border-slate-200
-                    text-sm text-[#0F172A] focus:outline-none focus:ring-2  focus:ring-blue-500' onChange={e => setName(e.target.    value)}/>
-                </div>
-                
-
-                <div className='flex flex-col gap-1'>
-                    <label htmlFor="email" className='text-left text-xs font-medium uppercase tracking-wide text-[#64748B]'>Email</label>
-                    <input type="email" name="email" value={email}  id="email" className='w-full px-4 py-2.5 rounded-lg  border border-slate-200
-                    text-sm text-[#0F172A] focus:outline-none focus:ring-2  focus:ring-blue-500' onChange={e => setEmail(e.target.   value)}/>
+            {/* Card */}
+            <div className="w-full max-w-md border border-slate-200 rounded-lg shadow-sm p-8">
+                <div className="mb-6">
+                    <h1 className="text-2xl font-bold text-slate-900">Create an account</h1>
+                    <p className="text-sm text-slate-500 mt-1">Get started with ShopDesk</p>
                 </div>
 
-                <div className='flex flex-col gap-1'>
-                    <label htmlFor="phone" className='text-left text-xs font-medium uppercase tracking-wide text-[#64748B]'>Phone</label>
-                    <input type="tel" name="phone" value={phone}    id="phone" className='w-full px-4 py-2.5 rounded-lg    border border-slate-200
-                    text-sm text-[#0F172A] focus:outline-none focus:ring-2  focus:ring-blue-500' onChange={e => setPhone(e.target.   value)}/>
-                </div>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="space-y-1">
+                        <label className="text-xs font-medium text-slate-700">Full name</label>
+                        <input
+                            type="text"
+                            placeholder="John Doe"
+                            value={name}
+                            onChange={e => setName(e.target.value)}
+                            required
+                            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-colors"
+                        />
+                    </div>
 
-                <div className='flex flex-col gap-1'>
-                    <label htmlFor="password" className='text-left text-xs font-medium uppercase tracking-wide text-[#64748B] align-start'>Password</label>
-                    <input type="password" name="password" value=   {password} id="password" className='w-full px-4 py-2.5     rounded-lg border border-slate-200
-                    text-sm text-[#0F172A] focus:outline-none focus:ring-2  focus:ring-blue-500' onChange={e => setPassword(e.   target.value)}/>
-                </div>
+                    <div className="space-y-1">
+                        <label className="text-xs font-medium text-slate-700">Email</label>
+                        <input
+                            type="email"
+                            placeholder="you@example.com"
+                            value={email}
+                            onChange={e => setEmail(e.target.value)}
+                            required
+                            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-colors"
+                        />
+                    </div>
 
-                
-                <button type="submit" disabled={loading} className='bg-[#2563EB] text-white hover:bg-[#1D4ED8] transition-colors duration-150 w-full py-2.5 rounded-lg font-medium text-sm'>
-                    {loading ? "Registering User": "Register"}
-                </button>
-            </form>
-            {error && <p className='text-sm text-[#EF4444]'>{error}</p>}
+                    <div className="space-y-1">
+                        <label className="text-xs font-medium text-slate-700">Phone number</label>
+                        <input
+                            type="tel"
+                            placeholder="+1 234 567 8900"
+                            value={phone}
+                            onChange={e => setPhone(e.target.value)}
+                            required
+                            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-colors"
+                        />
+                    </div>
 
-            <p className='text-sm text-[#64748B] mt-4 text-center'>Already have an account?{" "}
-                <Link to="/" className='text-[#2563EB] font-medium hover:underline'>Login</Link>
-            </p>
+                    <div className="space-y-1">
+                        <label className="text-xs font-medium text-slate-700">Password</label>
+                        <input
+                            type="password"
+                            placeholder="••••••••"
+                            value={password}
+                            onChange={e => setPassword(e.target.value)}
+                            required
+                            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-colors"
+                        />
+                    </div>
 
-            
+                    {error && (
+                        <p className="text-xs text-red-500">{error}</p>
+                    )}
+
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+                    >
+                        {loading ? "Creating account..." : "Create account"}
+                    </button>
+                </form>
+
+                <p className="text-sm text-slate-500 text-center mt-6">
+                    Already have an account?{" "}
+                    <Link to="/" className="text-blue-600 font-medium hover:text-blue-700 transition-colors">
+                        Sign in
+                    </Link>
+                </p>
+            </div>
         </div>
-    </div>
-  )
+    )
 }
